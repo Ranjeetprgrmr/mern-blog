@@ -71,9 +71,8 @@ export default function DashProfile() {
             <div
               className="bg-blue-500 rounded-full h-4 p-2 "
               style={{ width: `${percentage}%` }}
-            >
-            </div>
-              <span className="text-gray-500 text-xs">{percentage}%</span>
+            ></div>
+            <span className="text-gray-500 text-xs">{percentage}%</span>
             {/* <span className="text-gray-500 text-xs absolute right-0 top-0 mt-2">
               {percentage}%
             </span> */}
@@ -84,14 +83,21 @@ export default function DashProfile() {
           id="username"
           placeholder="username"
           defaultValue={currentUser.username}
+          style={{ width: "400px" }}
         />
         <TextInput
           type="email"
           id="email"
           placeholder="email"
           defaultValue={currentUser.email}
+          style={{ width: "400px" }}
         />
-        <TextInput type="password" id="password" placeholder="password" />
+        <TextInput
+          type="password"
+          id="password"
+          placeholder="password"
+          style={{ width: "400px" }}
+        />
         <Button type="submit" gradientDuoTone="cyanToBlue" outline>
           Update
         </Button>
