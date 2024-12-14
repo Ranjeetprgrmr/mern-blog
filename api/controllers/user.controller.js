@@ -28,28 +28,29 @@ export const updateUser = async (req, res, next) => {
     if (req.body.username.includes(" ")) {
       return next(errorHandler(400, "Username cannot contain spaces"));
     }
-    if(req.body.username !== req.body.username.toLowerCase()) {
+    if (req.body.username !== req.body.username.toLowerCase()) {
       return next(errorHandler(400, "Username must be lowercase"));
     }
-    if(!req.body.username.match(/^[a-zA-Z0-9]+$/)) {
+    if (!req.body.username.match(/^[a-zA-Z0-9]+$/)) {
       return next(errorHandler(400, "Username must be alphanumeric"));
     }
-    try{
-       const updatedUser = await User.findByIdAndUpdate(req.params.userId,
-         {
+  }
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.userId,
+      {
         $set: {
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password,
-            profilePicture: req.body.profilePicture,
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+          profilePicture: req.body.profilePicture,
         },
-       },
-       {new: true}
+      },
+      { new: true }
     );
-       const {password, ...otherDetails} = updatedUser._doc;
-       res.status(200).json(otherDetails);
-    }catch(error) {
-        next(error);
-    }
+    const { password, ...otherDetails } = updatedUser._doc;
+    res.status(200).json(otherDetails);
+  } catch (error) {
+    next(error);
   }
 };
