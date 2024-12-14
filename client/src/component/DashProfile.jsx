@@ -8,6 +8,7 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  signoutSuccess,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
@@ -105,9 +106,9 @@ export default function DashProfile() {
     }
   };
 
-  const handleDeleteUser = async() => {
+  const handleDeleteUser = async () => {
     setShowModal(false);
-    try{
+    try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: "DELETE",
@@ -116,19 +117,37 @@ export default function DashProfile() {
         },
       });
       const data = await res.json();
-      if(!res.ok) {
+      if (!res.ok) {
         dispatch(deleteUserFailure(data.message));
-      }else {
+      } else {
         dispatch(deleteUserSuccess());
         localStorage.removeItem("token");
         localStorage.removeItem("profilePicture");
         navigate("/sign-in");
       }
-
-    }catch(error){
+    } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
-  }
+  };
+
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
+        localStorage.removeItem("token");
+        localStorage.removeItem("profilePicture");
+        navigate("/sign-in");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
       <h1 className="my-7 text-center font-semibold text-3xl">profile</h1>
@@ -196,7 +215,9 @@ export default function DashProfile() {
         <span onClick={() => setShowModal(true)} className="cursor-pointer">
           Delete Account
         </span>
-        <span className="cursor-pointer">Sign Out</span>
+        <span onClick={handleSignout} className="cursor-pointer">
+          Sign Out
+        </span>
       </div>
       {updateUserSuccess && (
         <Alert color="success" className="mt-5">
@@ -219,13 +240,11 @@ export default function DashProfile() {
         onClose={() => setShowModal(false)}
       >
         <div className="text-center">
-        
-            <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto p-3" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete your account?
-            </h3>
+          <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto p-3" />
+          <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            Are you sure you want to delete your account?
+          </h3>
           <Modal.Body>
-          
             <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
               Once you delete your account, there is no going back. Please be
               certain.
