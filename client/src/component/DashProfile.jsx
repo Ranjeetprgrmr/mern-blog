@@ -36,13 +36,15 @@ export default function DashProfile() {
   }, []);
 
   const handleImageChange = async (e) => {
-    // setImageFile(e.target.files[0]);
+    e.preventDefault();
+    try{
     const file = e.target.files[0];
     if (file) {
       setIsUploading(true);
       setImageFile(file);
       setImageFileUrl(URL.createObjectURL(file));
       const reader = new FileReader();
+      reader.readAsDataURL(file);
       reader.onload = () => {
         localStorage.setItem("profilePicture", reader.result);
         handleImageUploadComplete();
@@ -52,9 +54,12 @@ export default function DashProfile() {
         setPercentage(progress);
       };
       await new Promise((resolve) => setTimeout(resolve, 1000)); // add a 5 second delay
-      reader.readAsDataURL(file);
       setFormData({ ...formData, profilePicture: reader.result });
     }
+    }catch(error){
+      console.log(error);
+    }
+   
   };
 
   const handleImageUploadComplete = () => {

@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
 import { useNavigate } from "react-router-dom";
 import { signoutSuccess } from "../redux/user/userSlice";
+import { useEffect, useState } from "react";
 
 
 export default function Header() {
@@ -14,6 +15,7 @@ export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const {theme} = useSelector((state) => state.theme);
   const navigate = useNavigate();
+  const [image, setImage] = useState();
 
   const handleSignout = async () => {
     try {
@@ -33,6 +35,23 @@ export default function Header() {
       console.log(error.message);
     }
   };
+
+ 
+
+  // This code sets up a timer to check the local storage every second (1000 milliseconds). If the local storage has changed, the component is updated with the new value.
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const storedImage = localStorage.getItem("profilePicture");
+      if (storedImage !== image) {
+        setImage(storedImage);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [image]);
+
 
   return (
     <Navbar className="border-b-2">
@@ -70,7 +89,7 @@ export default function Header() {
             arrowIcon={false}
             inline
             label={
-              <Avatar alt="user" img={currentUser.profilePicture} rounded />
+              <Avatar alt="user" img={image ||currentUser.profilePicture} rounded />
             }
           >
             <Dropdown.Header>
