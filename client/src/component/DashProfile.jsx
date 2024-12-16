@@ -33,9 +33,13 @@ export default function DashProfile() {
     if (storedImage) {
       setImageFileUrl(storedImage);
     }
+    return () => {
+      URL.revokeObjectURL(imageFileUrl);
+    };
   }, []);
 
   const handleImageChange = async (e) => {
+    console.log('handleImageChange called');
     e.preventDefault();
     try{
     const file = e.target.files[0];
@@ -43,6 +47,7 @@ export default function DashProfile() {
       setIsUploading(true);
       setImageFile(file);
       setImageFileUrl(URL.createObjectURL(file));
+      console.log('Image URL:', imageFileUrl);
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -58,6 +63,7 @@ export default function DashProfile() {
     }
     }catch(error){
       console.log(error);
+      console.error('Error fetching or updating profile picture:', error);
     }
    
   };

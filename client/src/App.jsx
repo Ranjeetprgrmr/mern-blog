@@ -12,6 +12,7 @@ import FooterCom from "./component/Footer";
 import PrivateRoute from "./component/PrivateRoute";
 import OnlyAdminPrivateRoute from "./component/OnlyAdminPrivateRoute";
 import CreatePost from "./pages/CreatePost";
+import PostPage from "./pages/PostPage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/post/:slug" element={<PostPage />} />
 
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />

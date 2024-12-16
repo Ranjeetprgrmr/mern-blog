@@ -2,6 +2,8 @@ import { Button, FileInput, Select, TextInput } from "flowbite-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useState, useEffect } from "react";
+import { Alert } from "flowbite-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function CreatePost() {
   const [file, setFile] = useState(null);
@@ -11,6 +13,12 @@ export default function CreatePost() {
   const [percentage, setPercentage] = useState(0);
   const [formData, setFormData] = useState({});
   const [imageUploadError, setImageUploadError] = useState(null);
+  const [publishError, setPublishError] = useState(null);
+  const [message, setMessage] = useState("");
+
+  const navigate = useNavigate();
+  const params = useParams();
+  const slug = params.slug;
 
   useEffect(() => {
     const storedImage = localStorage.getItem("image");
@@ -22,7 +30,7 @@ export default function CreatePost() {
   const handleImageUpload = async (e) => {
     e.preventDefault();
     try {
-      console.log("File value:", file);
+      // console.log("File value:", file);
       if (!file || file === null || file === undefined) {
         setImageUploadError("Please select an image");
         return;
@@ -54,11 +62,47 @@ export default function CreatePost() {
     setIsUploading(false);
     setPercentage(100);
   };
-  console.log("this is formdata", formData);
+  // console.log("this is formdata", formData);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/post/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log("Error response:", res);
+        console.log("Error data:", data);
+        // setPublishError(data.message);
+        setPublishError(data);
+      }
+
+      if (res.ok) {
+        console.log("Success!");
+        setPublishError(null);
+        setMessage("Your post has been published successfully!");
+        setTimeout(() => {
+          setMessage("");
+        }, 3000); // hide message after 3 seconds
+        // console.log("Slug:", data.slug);
+        navigate(`/post/${data.slug}`);
+      }
+
+      // console.log(data);
+    } catch (error) {
+      setPublishError("Something went wrong. Please try again later.");
+    }
+  };
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold">Create a post</h1>
-      <form className="flex flex-col gap-4">
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <TextInput
             type="text"
@@ -66,8 +110,15 @@ export default function CreatePost() {
             required
             id="title"
             className="flex-1"
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
           />
-          <Select>
+          <Select
+            onChange={(e) =>
+              setFormData({ ...formData, category: e.target.value })
+            }
+          >
             <option value="uncategorized">Select a category</option>
             <option value="javascript">Javascript</option>
             <option value="ReactJs">ReactJs</option>
@@ -112,10 +163,15 @@ export default function CreatePost() {
           placeholder="Write something..."
           className="h-72 mb-12"
           required
+          onChange={(value) => setFormData({ ...formData, content: value })}
         />
         <Button type="submit" gradientDuoTone="purpleToBlue" size="sm" outline>
           Publish
         </Button>
+        {publishError && (
+          <Alert className="text-red-500 mt-5">{publishError}</Alert>
+        )}
+        {message && <Alert className="text-green-500 mt-5">{message}</Alert>}
       </form>
     </div>
   );

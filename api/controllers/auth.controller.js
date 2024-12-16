@@ -115,5 +115,7 @@ export const google = async (req, res, next) => {
         })
         .json(others);
     }
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };

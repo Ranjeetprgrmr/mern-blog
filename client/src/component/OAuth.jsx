@@ -36,6 +36,7 @@ export default function OAuth() {
       }
     } catch (error) {
       console.log(error);
+    
     }
   };
   return (
