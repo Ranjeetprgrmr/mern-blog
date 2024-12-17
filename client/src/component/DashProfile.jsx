@@ -23,6 +23,7 @@ export default function DashProfile() {
   const [formData, setFormData] = useState({});
   const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
   const [updateUserError, setUpdateUserError] = useState(null);
+  const [imageUploadError, setImageUploadError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const filePickerRef = useRef();
   const dispatch = useDispatch();
@@ -39,38 +40,49 @@ export default function DashProfile() {
   }, []);
 
   const handleImageChange = async (e) => {
-    console.log('handleImageChange called');
+    console.log("handleImageChange called");
     e.preventDefault();
-    try{
-    const file = e.target.files[0];
-    if (file) {
-      setIsUploading(true);
-      setImageFile(file);
-      setImageFileUrl(URL.createObjectURL(file));
-      console.log('Image URL:', imageFileUrl);
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        localStorage.setItem("profilePicture", reader.result);
-        handleImageUploadComplete();
-      };
-      reader.onprogress = (e) => {
-        const progress = (e.loaded / e.total) * 100;
-        setPercentage(progress);
-      };
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // add a 5 second delay
-      setFormData({ ...formData, profilePicture: reader.result });
-    }
-    }catch(error){
+    try {
+      const file = e.target.files[0];
+      if (file) {
+        setIsUploading(true);
+        setImageFile(file);
+        setImageFileUrl(URL.createObjectURL(file));
+        console.log("Image URL:", imageFileUrl);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          localStorage.setItem("profilePicture", reader.result);
+          handleImageUploadComplete();
+        };
+        reader.onprogress = (e) => {
+          const progress = (e.loaded / e.total) * 100;
+          setPercentage(progress);
+        };
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // add a 5 second delay
+        setFormData({ ...formData, profilePicture: reader.result });
+      }
+    } catch (error) {
       console.log(error);
-      console.error('Error fetching or updating profile picture:', error);
+      console.error("Error fetching or updating profile picture:", error);
     }
-   
   };
 
   const handleImageUploadComplete = () => {
-    setIsUploading(false);
-    setPercentage(100);
+    e.preventDefault();
+    try {
+      // ...
+      if (file && file.size > MAX_FILE_SIZE) {
+        setImageUploadError("File size exceeds the maximum limit");
+        return;
+      }
+      // ...
+      setIsUploading(false);
+      setPercentage(100);
+    } catch (error) {
+      console.log(error);
+      setImageUploadError("Please select an image");
+    }
   };
   // console.log("this is imageFile", imageFile);
   // console.log("this is imageFileUrl", imageFileUrl);
@@ -219,13 +231,13 @@ export default function DashProfile() {
           onChange={handleChange}
         />
         <Button
-         type="submit" 
-         gradientDuoTone="purpleToBlue" 
-         outline
-         disabled={loading || isUploading}
-         style={{ width: "400px" }}
-         >
-          {loading ? 'Loading...' : 'Update'}
+          type="submit"
+          gradientDuoTone="purpleToBlue"
+          outline
+          disabled={loading || isUploading}
+          style={{ width: "400px" }}
+        >
+          {loading ? "Loading..." : "Update"}
         </Button>
         {currentUser.isAdmin && (
           <Link to={"/create-post"}>

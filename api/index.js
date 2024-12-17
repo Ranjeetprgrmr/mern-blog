@@ -21,7 +21,8 @@ const app = express();
 
 app.use(cookieParser());
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // set the maximum request body size to 50mb
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.listen(3000, () => {
   console.log("Server running on port 3000");

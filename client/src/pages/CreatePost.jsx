@@ -123,6 +123,10 @@ export default function CreatePost() {
             <option value="javascript">Javascript</option>
             <option value="ReactJs">ReactJs</option>
             <option value="NextJs">NextJs</option>
+            <option value="NodeJs">NodeJs</option>
+            <option value="MongoDB">MongoDB</option>
+            <option value="ExpressJs">ExpressJs</option>
+            <option value="TailwindCss">TailwindCss</option>
           </Select>
         </div>
         <div className="flex gap-4 items-center justify-between border-4 border-teat-500 border-dotted p-3">
