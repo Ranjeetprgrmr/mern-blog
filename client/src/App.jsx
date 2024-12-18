@@ -14,10 +14,13 @@ import OnlyAdminPrivateRoute from "./component/OnlyAdminPrivateRoute";
 import CreatePost from "./pages/CreatePost";
 import PostPage from "./pages/PostPage";
 import UpdatePost from "./pages/UpdatePost";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
   return (
     <BrowserRouter>
+    <ToastContainer />
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

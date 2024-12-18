@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { FaCheck, FaTimes } from "react-icons/fa";
+import { toast } from 'react-toastify';
 
 export default function DashUsers() {
   const { currentUser } = useSelector((state) => state.user);
@@ -11,6 +12,7 @@ export default function DashUsers() {
   const [showMore, setShowMore] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
   useEffect(() => {
     const fecthUsers = async () => {
       try {
@@ -19,7 +21,7 @@ export default function DashUsers() {
         if (res.ok) {
           setUsers(data.users);
           // console.log(data.posts); // Add this line to log the userPosts array
-          if (data.users.length < 9) {
+          if (data.users.length < 5) {
             setShowMore(false);
           }
         }
@@ -39,7 +41,7 @@ export default function DashUsers() {
       const data = await res.json();
       if (res.ok) {
         setUsers((prev) => [...prev, ...data.users]);
-        if (data.users.length < 9) {
+        if (data.users.length < 5) {
           setShowMore(false);
         }
       }
@@ -48,7 +50,23 @@ export default function DashUsers() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {}
+  const handleDeleteUser = async (userId) => {
+    try {
+      const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers((prev) => prev.filter((user) => user._id !== userIdToDelete));
+        setShowModal(false);
+        toast.success("User deleted successfully");
+      } else {
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <div
@@ -81,7 +99,13 @@ export default function DashUsers() {
                   </Table.Cell>
                   <Table.Cell> {user.username}</Table.Cell>
                   <Table.Cell>{user.email}</Table.Cell>
-                  <Table.Cell>{user.isAdmin ? <FaCheck className="text-green-400"/> : <FaTimes className="text-red-400" />} </Table.Cell>
+                  <Table.Cell>
+                    {user.isAdmin ? (
+                      <FaCheck className="text-green-400" />
+                    ) : (
+                      <FaTimes className="text-red-400" />
+                    )}{" "}
+                  </Table.Cell>
                   <Table.Cell>
                     <span
                       onClick={() => {
@@ -92,6 +116,7 @@ export default function DashUsers() {
                     >
                       Delete
                     </span>
+                
                   </Table.Cell>
                 </Table.Row>
               </Table.Body>
