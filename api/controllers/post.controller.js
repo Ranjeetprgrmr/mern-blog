@@ -112,6 +112,7 @@ export const updatePost = async (req, res, next) => {
     res.status(200).json({
       message: "Post updated successfully",
       post: updatedPost,
+      slug: updatedPost.slug, // Add this line
     });
   } catch (error) {
     next(error);
