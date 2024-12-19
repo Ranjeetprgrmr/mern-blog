@@ -16,10 +16,12 @@ import PostPage from "./pages/PostPage";
 import UpdatePost from "./pages/UpdatePost";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ScrollToTop from "./component/ScrollToTop";
 
 export default function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
     <ToastContainer />
       <Header />
       <Routes>
