@@ -1,16 +1,18 @@
-import { Alert, Button, Textarea } from "flowbite-react";
+import { Alert, Button, Modal, Textarea } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Comment from "./Comment";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
   const [comment, setComment] = useState("");
   const [commentError, setCommentError] = useState(null);
   const [comments, setComments] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const navigate = useNavigate();
-  console.log(comments);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (comment.length > 200) {
@@ -85,7 +87,7 @@ export default function CommentSection({ postId }) {
 
   // deep meaning of using parenthesis and curly braces on the following 2 function
   const handleEdit = async (comment, editedContent) => {
-     setComments(
+    setComments(
       comments.map((c) =>
         c._id === comment._id ? { ...c, content: editedContent } : c
       )
@@ -98,6 +100,25 @@ export default function CommentSection({ postId }) {
   //     })
   //   )
   // };
+
+  const handleDelete = async (commentId) => {
+    setShowModal(false);
+    try {
+      if (!currentUser) {
+        navigate("/sign-in");
+        return;
+      }
+      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(comments.filter((comment) => comment._id !== commentId));
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {currentUser ? (
@@ -167,11 +188,41 @@ export default function CommentSection({ postId }) {
                 comment={comment}
                 onLike={handelLike}
                 onEdit={handleEdit}
+                onDelete={(commentId) => {
+                  setShowModal(true);
+                  setCommentToDelete(commentId);
+                }}
               />
             ))
           )}
         </>
       )}
+      <Modal
+        className="text-center"
+        show={showModal}
+        onClose={() => setShowModal(false)}
+      >
+        <div className="text-center">
+          <HiOutlineExclamationCircle className="h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto p-3" />
+          <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            Are you sure you want to delete this comment?
+          </h3>
+          <Modal.Body>
+            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+              Once you delete your comment, there is no going back. Please be
+              certain.
+            </p>
+          </Modal.Body>
+          <Modal.Footer className="flex justify-center">
+            <Button color="failure" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button color="success" onClick={ () => handleDelete(commentToDelete)}>
+              Yes, I'm sure
+            </Button>
+          </Modal.Footer>
+        </div>
+      </Modal>
     </div>
   );
 }

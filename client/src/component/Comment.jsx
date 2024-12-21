@@ -4,7 +4,7 @@ import { FaThumbsUp } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { Button, Textarea } from "flowbite-react";
 
-export default function Comment({ comment, onLike, onEdit }) {
+export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const [user, setUser] = useState({});
   // console.log(user);
   const { currentUser } = useSelector((state) => state.user);
@@ -31,7 +31,7 @@ export default function Comment({ comment, onLike, onEdit }) {
   };
 
   const handleSave = async () => {
-    console.log('handleSave function called');
+    console.log("handleSave function called");
     try {
       const res = await fetch(`/api/comment/editComment/${comment._id}`, {
         method: "PUT",
@@ -48,6 +48,8 @@ export default function Comment({ comment, onLike, onEdit }) {
       console.log(error.message);
     }
   };
+
+  const handleDelete = async () => {};
 
   return (
     <div className="flex items-center p-4 border-b dark:border-gray-600 text-sm">
@@ -116,13 +118,22 @@ export default function Comment({ comment, onLike, onEdit }) {
               </p>
               {currentUser &&
                 (currentUser._id === comment.userId || currentUser.isAdmin) && (
-                  <button
-                    type="button"
-                    className="text-gray-500 hover:text-blue-500"
-                    onClick={handleEdit}
-                  >
-                    Edit
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="text-gray-500 hover:text-blue-500"
+                      onClick={handleEdit}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="text-gray-500 hover:text-red-500"
+                      onClick={() => onDelete(comment._id)}
+                    >
+                      Delete
+                    </button>
+                  </>
                 )}
             </div>
           </>
