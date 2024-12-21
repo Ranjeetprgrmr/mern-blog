@@ -9,8 +9,8 @@ export default function CommentSection({ postId }) {
   const [comment, setComment] = useState("");
   const [commentError, setCommentError] = useState(null);
   const [comments, setComments] = useState([]);
-  console.log(comments);
   const navigate = useNavigate();
+  console.log(comments);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (comment.length > 200) {
@@ -44,8 +44,8 @@ export default function CommentSection({ postId }) {
     const getComments = async () => {
       try {
         const res = await fetch(`/api/comment/getPostComments/${postId}`);
-        const data = await res.json();
         if (res.ok) {
+          const data = await res.json();
           setComments(data);
         }
       } catch (error) {
@@ -67,7 +67,7 @@ export default function CommentSection({ postId }) {
       if (res.ok) {
         const data = await res.json();
         setComments(
-          comments.map((comment) => 
+          comments.map((comment) =>
             comment._id === commentId
               ? {
                   ...comment,
@@ -83,6 +83,21 @@ export default function CommentSection({ postId }) {
     }
   };
 
+  // deep meaning of using parenthesis and curly braces on the following 2 function
+  const handleEdit = async (comment, editedContent) => {
+     setComments(
+      comments.map((c) =>
+        c._id === comment._id ? { ...c, content: editedContent } : c
+      )
+    );
+  };
+  // const handleEdit = async (comment, editedContent) => {
+  //   setComments(
+  //     comments.map((c) => {
+  //      return  c._id === comment._id ? { ...c, content: editedContent } : c
+  //     })
+  //   )
+  // };
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {currentUser ? (
@@ -143,11 +158,18 @@ export default function CommentSection({ postId }) {
               <p>{comments.length}</p>
             </div>
           </div>
-          {comments.map((comment) => {
-            return <Comment key={comment._id} comment={comment}
-             onLike={handelLike}
-             />;
-          })}
+          {comments.length === 0 ? (
+            <p>No comments yet!</p>
+          ) : (
+            comments.map((comment) => (
+              <Comment
+                key={comment._id}
+                comment={comment}
+                onLike={handelLike}
+                onEdit={handleEdit}
+              />
+            ))
+          )}
         </>
       )}
     </div>
