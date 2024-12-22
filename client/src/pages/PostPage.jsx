@@ -3,15 +3,16 @@ import { useEffect, useState } from "react";
 import { Button, Spinner } from "flowbite-react";
 import CallToAction from "../component/CallToAction";
 import CommentSection from "../component/CommentSection";
+import PostCard from "../component/PostCard";
 
 export default function PostPage() {
   const { postSlug } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [posts, setPost] = useState(null);
-  // console.log('this is post', posts && posts.title);
+  const [recentPosts, setRecentPosts] = useState(null);
+
   useEffect(() => {
-    // console.log('this is slug',postSlug);
     const fetchPost = async () => {
       try {
         setLoading(true);
@@ -35,6 +36,21 @@ export default function PostPage() {
     };
     fetchPost();
   }, [postSlug]);
+
+  useEffect(() => {
+    try {
+      const fetchRecentPosts = async () => {
+        const res = await fetch(`/api/post/getPosts?limit=3`);
+        const data = await res.json();
+        if (res.ok) {
+          setRecentPosts(data.posts);
+        }
+      };
+      fetchRecentPosts();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   if (loading)
     return (
@@ -74,6 +90,13 @@ export default function PostPage() {
         <CallToAction />
       </div>
       <CommentSection postId={posts && posts._id} />
+      <div className="flex flex-col justify-center items-center mb-1.5">
+        <h1 className="text-xl mt-5 font-bold">Related Articles</h1>
+        <div className="flex flex-wrap gap-5 mt-5 justify-center">
+          {recentPosts &&
+            recentPosts.map((post) => <PostCard key={post._id} post={post} />)}
+        </div>
+      </div>
     </main>
   );
 }
