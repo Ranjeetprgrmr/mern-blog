@@ -14,6 +14,7 @@ import OnlyAdminPrivateRoute from "./component/OnlyAdminPrivateRoute";
 import CreatePost from "./pages/CreatePost";
 import PostPage from "./pages/PostPage";
 import UpdatePost from "./pages/UpdatePost";
+import Search from "./pages/Search";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from "./component/ScrollToTop";
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/post/:postSlug" element={<PostPage />} />
 
         <Route element={<PrivateRoute />}>

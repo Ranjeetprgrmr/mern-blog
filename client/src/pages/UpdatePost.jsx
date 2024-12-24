@@ -8,17 +8,30 @@ import { useSelector } from "react-redux";
 
 export default function UpdatePost() {
   const [file, setFile] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [percentage, setPercentage] = useState(0);
-  const [formData, setFormData] = useState({});
+
+  //   I'm glad that worked for you.
+  // By adding the _id property to the formData object, you ensured that it had the necessary property to access the postId value.
+  // This is a good example of how to initialize state with props in React. By using the postId prop to initialize the _id property of the formData object, you were able to access the postId value in your API request.
+  // If you have any more questions or need further assistance, feel free to ask!
+  const { postId } = useParams();
+  const [imageFile, setImageFile] = useState(null);
+  const [formData, setFormData] = useState({
+    _id: postId, // Add the _id property to the formData object
+    title: "",
+    category: "",
+    content: "",
+    image: "",
+  });
+  console.log("this is formdata", formData);
+
   const [imageUploadError, setImageUploadError] = useState(null);
   const [publishError, setPublishError] = useState(null);
   const [message, setMessage] = useState("");
 
   const navigate = useNavigate();
-  const { postId } = useParams();
 
   const { currentUser } = useSelector((state) => state.user);
 
@@ -27,15 +40,18 @@ export default function UpdatePost() {
       const fetchPost = async () => {
         const res = await fetch(`/api/post/getPosts?postId=${postId}`);
         const data = await res.json();
-        if(!res.ok) {
-          console.log(data.message);
+        if (!res.ok) {
           setPublishError(data.message);
           return;
         }
-        if(res.ok) {
-            setPublishError(null);
-            setFormData(data.posts[0]);
-            setImageFileUrl(data.posts[0].image); // Update imageFileUrl state
+        if (res.ok) {
+          setPublishError(null);
+          setFormData(data.posts[0]);
+          if (data.posts[0].image) {
+            setImageFileUrl(data.posts[0].image);
+          } else {
+            setImageFileUrl(null);
+          }
         }
       };
       fetchPost();
@@ -47,7 +63,6 @@ export default function UpdatePost() {
   const handleImageUpload = async (e) => {
     e.preventDefault();
     try {
-      // console.log("File value:", file);
       if (!file || file === null || file === undefined) {
         setImageUploadError("Please select an image");
         return;
@@ -60,6 +75,8 @@ export default function UpdatePost() {
       reader.readAsDataURL(file);
       reader.onload = () => {
         localStorage.setItem("image", reader.result);
+        // setFormData({ ...formData, image: reader.result });
+        // setImageFileUrl(reader.result); // Update imageFileUrl state variable
         handleImageUploadComplete();
       };
       reader.onprogress = (e) => {
@@ -79,23 +96,25 @@ export default function UpdatePost() {
     setIsUploading(false);
     setPercentage(100);
   };
-  // console.log("this is formdata", formData);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/post/updatePost/${formData._id}/${currentUser._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      console.log("this is formdata._id", formData._id);
+      const res = await fetch(
+        `/api/post/updatePost/${formData._id}/${currentUser._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
       const data = await res.json();
       if (!res.ok) {
         console.log("Error response:", res);
         console.log("Error data:", data);
-        // setPublishError(data.message);
         setPublishError(data);
       }
 
@@ -106,11 +125,8 @@ export default function UpdatePost() {
         setTimeout(() => {
           setMessage("");
         }, 3000); // hide message after 3 seconds
-        // console.log("Slug:", data.slug);
         navigate(`/post/${data.slug}`);
       }
-
-      // console.log(data);
     } catch (error) {
       setPublishError("Something went wrong. Please try again later.");
     }
@@ -140,12 +156,12 @@ export default function UpdatePost() {
           >
             <option value="uncategorized">Select a category</option>
             <option value="javascript">Javascript</option>
-            <option value="ReactJs">ReactJs</option>
-            <option value="NextJs">NextJs</option>
-            <option value="NodeJs">NodeJs</option>
-            <option value="MongoDB">MongoDB</option>
-            <option value="ExpressJs">ExpressJs</option>
-            <option value="TailwindCss">TailwindCss</option>
+            <option value="reactjs">React.js</option>
+            <option value="nextjs">Next.js</option>
+            <option value="nodejs">Node.js</option>
+            <option value="mongodb">MongoDB</option>
+            <option value="expressjs">Express.js</option>
+            <option value="tailwindcss">TailwindCss</option>
           </Select>
         </div>
         <div className="flex gap-4 items-center justify-between border-4 border-teat-500 border-dotted p-3">
@@ -165,9 +181,18 @@ export default function UpdatePost() {
             Upload Image
           </Button>
         </div>
-        {formData.image && (
-          <img src={formData.image} alt="Uploaded" className="w-full h-[600px]" />
+        {formData.image ? (
+          <img
+            src={formData.image || imageFileUrl}
+            alt="Uploaded"
+            className="w-full h-[600px]"
+          />
+        ) : (
+          <>
+            {imageFileUrl && <img src={imageFileUrl} alt="post image" />}
+          </>
         )}
+
         {isUploading ? (
           <div className="w-full bg-gray-200 rounded-full h-4 flex justify-between">
             <div
@@ -175,9 +200,6 @@ export default function UpdatePost() {
               style={{ width: `${percentage}%` }}
             ></div>
             <span className="text-gray-500 text-xs">{percentage}%</span>
-            {/* <span className="text-gray-500 text-xs absolute right-0 top-0 mt-2">
-        {percentage}%
-      </span> */}
           </div>
         ) : null}
         {imageUploadError && <p className="text-red-500">{imageUploadError}</p>}
@@ -190,7 +212,7 @@ export default function UpdatePost() {
           onChange={(value) => setFormData({ ...formData, content: value })}
         />
         <Button type="submit" gradientDuoTone="purpleToBlue" size="sm" outline>
-           Update Post
+          Update Post
         </Button>
         {publishError && (
           <Alert className="text-red-500 mt-5">{publishError}</Alert>

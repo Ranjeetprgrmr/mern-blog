@@ -93,8 +93,13 @@ export const deletePost = async (req, res, next) => {
 };
 
 export const updatePost = async (req, res, next) => {
+  // console.log(req.params);
+  // console.log(req);
   if (!req.user.isAdmin || req.user.id !== req.params.userId) {
     return next(errorHandler(403, "Not authorized"));
+  }
+  if (!req.params.postId) {
+    return res.status(400).json({ error: 'Post ID is required' });
   }
   try {
     const updatedPost = await Post.findByIdAndUpdate(
@@ -109,6 +114,9 @@ export const updatePost = async (req, res, next) => {
       },
       { new: true }
     );
+    if (!updatedPost) {
+      return next(errorHandler(404, "Post not found"));
+    }
     res.status(200).json({
       message: "Post updated successfully",
       post: updatedPost,

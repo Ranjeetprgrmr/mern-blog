@@ -1,21 +1,31 @@
 import { Avatar, Button, Dropdown, Navbar, TextInput } from "flowbite-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
-import { useNavigate } from "react-router-dom";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { useEffect, useState } from "react";
 
 
 export default function Header() {
   const path = useLocation().pathname;
+  const location = useLocation();
   const dispatch = useDispatch();
-  const { currentUser } = useSelector((state) => state.user);
-  const {theme} = useSelector((state) => state.theme);
   const navigate = useNavigate();
   const [image, setImage] = useState();
+  const [searchTerm, setSearchTerm] = useState("");
+  const { currentUser } = useSelector((state) => state.user);
+  const {theme} = useSelector((state) => state.theme);
+  console.log('this is serachTerm', searchTerm);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const setSearchTermFromUrl = urlParams.get("searchTerm");
+    if(setSearchTermFromUrl){
+      setSearchTerm(setSearchTermFromUrl);
+    }
+  },[location.search]);
 
   const handleSignout = async () => {
     try {
@@ -36,8 +46,6 @@ export default function Header() {
     }
   };
 
- 
-
   // This code sets up a timer to check the local storage every second (1000 milliseconds). If the local storage has changed, the component is updated with the new value.
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -52,6 +60,13 @@ export default function Header() {
     };
   }, [image]);
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set('searchTerm', searchTerm);
+    const searchQuery = urlParams.toString();
+    navigate(`/search?${searchQuery}`);
+  }
 
   return (
     <Navbar className="border-b-2">
@@ -64,12 +79,14 @@ export default function Header() {
         </span>
         Blog
       </Link>
-      <form>
+      <form onSubmit={handleSubmit}>
         <TextInput
           type="text"
           placeholder="Search..."
           rightIcon={AiOutlineSearch}
           className="hidden lg:inline"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </form>
       <Button className="w-12 h-10 lg:hidden" color="gray" pill>
